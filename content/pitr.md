@@ -18,7 +18,7 @@ Point-in-time restore creates a new branch from the database as it was at any mo
 
 ## Go deeper
 - Workspace: `lakebase_project`
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/point-in-time-restore
+- Docs: https://docs.databricks.com/en/oltp/projects/point-in-time-restore
 
 ## Timeline title
 Recover deleted opportunities without rewinding production

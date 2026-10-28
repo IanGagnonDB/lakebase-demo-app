@@ -19,7 +19,7 @@ Lakebase CDF (Public Preview) streams every insert, update and delete from a Pos
 ## Go deeper
 - Workspace: `bronze_history`
 - Workspace: `sql_editor`
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/lakebase-cdf
+- Docs: https://docs.databricks.com/en/oltp/projects/lakebase-cdf
 
 ## Flow stages
 App write

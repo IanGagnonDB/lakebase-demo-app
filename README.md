@@ -8,8 +8,8 @@ tables, CDF, branching, point-in-time restore, autoscaling) and compares it with
 
 | #   | Prerequisite                                                                          | Needed for                                                         | Who sets it up                                                                                                                                          |
 | --- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **AWS workspace** with serverless compute, Apps and Lakebase Autoscaling              | Every tab                                                          | Workspace admin                                                                                                                                         |
-| 2   | **Catalog on external storage** (same region), with `CREATE CATALOG` on the metastore | CDF (rejects default storage)                                      | Deployer, via [Terraform](terraform/README.md) or [by hand](https://docs.databricks.com/aws/en/connect/unity-catalog/cloud-storage/storage-credentials) |
+| 1   | **Databricks workspace on AWS or Azure** with serverless compute, Apps and Lakebase Autoscaling              | Every tab                                                          | Workspace admin                                                                                                                                         |
+| 2   | **Catalog on external storage** (S3 on AWS or ADLS Gen2 on Azure, same region), with `CREATE CATALOG` on the metastore | CDF (rejects default storage)                                      | Deployer, via [Terraform](terraform/README.md) or by hand ([AWS](https://docs.databricks.com/aws/en/connect/unity-catalog/cloud-storage/storage-credentials), [Azure](https://learn.microsoft.com/en-us/azure/databricks/connect/unity-catalog/cloud-storage/storage-credentials)) |
 | 3   | **Lakebase CDF** preview (`lakebase_cdf`)                                             | **CDF** tab                                                        | Workspace admin                                                                                                                                         |
 | 4   | **Lakebase Observability in System Tables** preview (`lakebase_system_table_o11y`)    | **Scaling** tab                                                    | Workspace admin                                                                                                                                         |
 | 5   | Permissions to create Lakebase projects, SQL warehouses, apps and jobs                | `bundle deploy`                                                    | Workspace admin                                                                                                                                         |
@@ -20,14 +20,29 @@ tables, CDF, branching, point-in-time restore, autoscaling) and compares it with
 
 ## Deploy (once, ~15 min)
 
-Replace `<catalog>`, then run the four commands as written (the flags are repeated on
+Use a workspace/region with all the required features and previews enabled on your
+chosen cloud. In-app documentation links follow the workspace cloud. Terraform provisions external storage and the data catalog in an
+**existing workspace**; it does not create the workspace. Choose
+[`terraform/aws`](terraform/aws/README.md) or [`terraform/azure`](terraform/azure/README.md).
+
+Authenticate to the intended workspace first (use a separate profile per workspace):
+
+```bash
+databricks auth login --host <workspace-url> --profile <workspace-profile>
+```
+
+For a fresh Azure deployment, use the Azure Terraform configuration with that same
+workspace profile, then run the bundle commands below. Resource names must be unused
+in the destination workspace/metastore; the existing AWS deployment is independent.
+
+Replace `<catalog>` and `<workspace-profile>`, then run the four commands as written (the flags are repeated on
 purpose, so they work in both bash and zsh):
 
 ```bash
-databricks bundle deploy -t workshop --var="catalog=<catalog>"
-databricks bundle run setup -t workshop --var="catalog=<catalog>"
-databricks bundle run lakebase_demo_app -t workshop --var="catalog=<catalog>"
-databricks apps get lakebase-demo-app    # prints the app URL
+databricks bundle deploy --profile <workspace-profile> -t workshop --var="catalog=<catalog>"
+databricks bundle run setup --profile <workspace-profile> -t workshop --var="catalog=<catalog>"
+databricks bundle run lakebase_demo_app --profile <workspace-profile> -t workshop --var="catalog=<catalog>"
+databricks apps get lakebase-demo-app --profile <workspace-profile>    # prints the app URL
 ```
 
 - `setup` writes the synthetic sales scorecard to Delta and grants the app catalog access.
@@ -44,8 +59,8 @@ Optional: add `--var="warehouse_size=<size>"` to change the SQL warehouse size (
 ## Cleanup
 
 ```bash
-databricks bundle destroy -t workshop --var="catalog=<catalog>"
-cd terraform && terraform destroy    # optional: only if you created prerequisite 2 with Terraform
+databricks bundle destroy --profile <workspace-profile> -t workshop --var="catalog=<catalog>"
+terraform -chdir=terraform/<aws-or-azure> destroy    # optional: use the cloud folder that created prerequisite 2
 ```
 
 ## Presenter notes

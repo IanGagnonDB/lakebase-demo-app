@@ -23,7 +23,7 @@ Expand **Individual changes** to demonstrate one insert, update, or delete at a 
 ## Go deeper
 - Workspace: `synced_targets`
 - Workspace: `delta_targets`
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/sync-tables
+- Docs: https://docs.databricks.com/en/oltp/projects/sync-tables
 
 ## UI
 rep: Rep

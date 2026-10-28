@@ -1,0 +1,12 @@
+subscription_id      = "<azure-subscription-id>"
+location             = "eastus2"
+resource_group_name  = "lakebase-demo-rg"
+storage_account_name = "<globally-unique-account>" # 3–24 lowercase letters or digits
+container_name       = "lakebase-demo"
+databricks_profile   = "<azure-workspace-profile>"
+# databricks_host     = "https://adb-<workspace-id>.<suffix>.azuredatabricks.net"
+catalog_name = "lakebase_demo"
+name_prefix  = "lakebase-demo"
+tags         = { demo = "lakebase" }
+# deployer_principal = "your-deployer-group" # User email, group name, or SP application ID.
+# grant_create_catalog = true # Optional; requires a metastore admin to apply.

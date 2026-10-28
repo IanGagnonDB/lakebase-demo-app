@@ -3,9 +3,12 @@ import { getContent } from "../../content/load";
 import { PageLayout } from "../../shared/PageLayout";
 import { Markdown } from "../../shared/Markdown";
 
+import { useDocsUrl } from "../../shared/meta";
+
 const icons = [ShieldCheck, Network, Database, BookOpen];
 
 export default function WrapUpTab() {
+  const docsUrl = useDocsUrl();
   const content = getContent("wrap-up");
   return (
     <PageLayout title={content.title} narrativeTitle="More capabilities"
@@ -22,7 +25,7 @@ export default function WrapUpTab() {
               </h3>
               <Markdown>{text}</Markdown>
               {link && (
-                <a className="mt-auto self-start text-sm text-primary underline underline-offset-4" href={link[2]} target="_blank" rel="noopener noreferrer">
+                <a className="mt-auto self-start text-sm text-primary underline underline-offset-4" href={docsUrl(link[2])} target="_blank" rel="noopener noreferrer">
                   {link[1].trim()}: {heading}
                 </a>
               )}

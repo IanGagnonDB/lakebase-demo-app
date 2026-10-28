@@ -1,7 +1,7 @@
 import { Skeleton } from "@databricks/appkit-ui/react";
 import { ExternalLink } from "lucide-react";
 import type { LinkKey } from "../api";
-import { useMeta } from "./meta";
+import { useDocsUrl, useMeta } from "./meta";
 
 const LABELS: Record<LinkKey, string> = {
   bronze_history: "Bronze history table in Catalog Explorer",
@@ -35,13 +35,14 @@ function Item({ href, label }: { href: string; label: string }) {
 
 export function GoDeeper({ workspace, docs, showHeading = true }: { workspace: LinkKey[]; docs: string[]; showHeading?: boolean }) {
   const { meta } = useMeta();
+  const docsUrl = useDocsUrl();
   if (workspace.length + docs.length === 0) return null;
   return (
     <section className="space-y-2">
       {showHeading && <h2 className="text-sm font-medium text-muted-foreground">Go deeper</h2>}
       <ul className="space-y-1">
         {workspace.map((k) => (meta ? <Item key={k} href={meta.links[k]} label={LABELS[k]} /> : <Skeleton key={k} className="h-4 w-64" />))}
-        {docs.map((u) => <Item key={u} href={u} label={docLabel(u)} />)}
+        {docs.map((u) => <Item key={u} href={docsUrl(u)} label={docLabel(u)} />)}
       </ul>
     </section>
   );

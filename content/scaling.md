@@ -17,8 +17,8 @@ Lakebase compute suspends after a configurable idle period (60 seconds to 7 days
 
 ## Go deeper
 - Workspace: `lakebase_project`
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/scale-to-zero
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/autoscaling
+- Docs: https://docs.databricks.com/en/oltp/projects/scale-to-zero
+- Docs: https://docs.databricks.com/en/oltp/projects/autoscaling
 
 ## Endpoint
 demo

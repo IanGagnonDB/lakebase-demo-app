@@ -17,7 +17,7 @@ A branch is an instant, copy-on-write copy of a database at any size, with its o
 
 ## Go deeper
 - Workspace: `lakebase_project`
-- Docs: https://docs.databricks.com/aws/en/oltp/projects/branches
+- Docs: https://docs.databricks.com/en/oltp/projects/branches
 
 ## Branch tree
 Branch tree

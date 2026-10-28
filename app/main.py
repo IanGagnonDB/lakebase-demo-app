@@ -35,7 +35,8 @@ async def reset_gate(request, call_next):
 
 WORKSPACE_URL = w.config.host.rstrip("/")
 WORKSPACE_ID = w.get_workspace_id()
-DOCS = "https://docs.databricks.com/aws/en/oltp/projects"
+DOCS = ("https://learn.microsoft.com/en-us/azure/databricks/oltp/projects"
+        if w.config.is_azure else "https://docs.databricks.com/aws/en/oltp/projects")
 
 
 @app.on_event("startup")

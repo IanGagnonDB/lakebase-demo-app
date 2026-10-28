@@ -13,3 +13,12 @@ export function MetaProvider({ children }: { children: ReactNode }) {
 }
 
 export const useMeta = () => useContext(MetaContext);
+
+// Content stores neutral URLs; metadata selects documentation for the workspace cloud.
+export function useDocsUrl() {
+  const { meta } = useMeta();
+  const base = meta?.links.docs_branches.replace(/\/branches$/, "");
+  return (url: string) => base
+    ? url.replace("https://docs.databricks.com/en/oltp/projects", base)
+    : url;
+}
