@@ -23,6 +23,7 @@ const empty = () => ({
 let session = empty();
 const listeners = new Set<() => void>();
 const cancellations = new Set<() => void>();
+let warmupGeneration = 0;
 export const comparisonRequest = { id: 0, pending: 0 };
 export const benchmarkRequest = { id: 0 };
 function publish(next: typeof session) { session = next; listeners.forEach(listener => listener()); }
@@ -30,6 +31,7 @@ export const h2hSession = {
   get: () => session,
   update: (change: (previous: typeof session) => typeof session) => publish(change(session)),
   reset() {
+    warmupGeneration++;
     comparisonRequest.id++; comparisonRequest.pending = 0; benchmarkRequest.id++;
     for (const cancel of cancellations) cancel();
     cancellations.clear();
@@ -38,12 +40,24 @@ export const h2hSession = {
   warmup(timeoutMessage: string) {
     if (session.warmStarted) return;
     publish({ ...session, warmStarted: true });
-    const id = comparisonRequest.id;
-    void requestTimeout(api.h2hWarmup()).then(warm => {
-      if (comparisonRequest.id === id) publish({ ...session, warm });
-    }, error => {
-      if (comparisonRequest.id === id) publish({ ...session, warmError: error instanceof Error && error.message.startsWith("Request timed out") ? timeoutMessage : errorMessage(error) });
-    });
+    const generation = warmupGeneration;
+    let retryMs = 5000;
+    const attempt = () => {
+      if (warmupGeneration !== generation) return;
+      void requestTimeout(api.h2hWarmup()).then(warm => {
+        if (warmupGeneration === generation) publish({ ...session, warm, warmError: undefined });
+      }, error => {
+        if (warmupGeneration !== generation) return;
+        publish({ ...session, warmError: error instanceof Error && error.message.startsWith("Request timed out") ? timeoutMessage : errorMessage(error) });
+        // Provisioning and warehouse startup can outlast the first request.
+        // Keep actions available while retrying; a successful probe clears the warning.
+        const cancel = () => { window.clearTimeout(timer); cancellations.delete(cancel); };
+        const timer = window.setTimeout(() => { cancellations.delete(cancel); attempt(); }, retryMs);
+        cancellations.add(cancel);
+        retryMs = Math.min(retryMs * 2, 60000);
+      });
+    };
+    attempt();
   },
 };
 export function useH2hSession() {

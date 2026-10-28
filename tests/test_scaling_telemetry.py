@@ -2,7 +2,7 @@ import importlib.util
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 spec = importlib.util.spec_from_file_location("scaling_telemetry", Path(__file__).parents[1] / "app/scaling_telemetry.py")
 module = importlib.util.module_from_spec(spec)
@@ -38,8 +38,35 @@ class ScalingTelemetryTests(unittest.TestCase):
         module.allocation("two", query)
         self.assertEqual(query.call_count, 2)
 
-    def test_failure_is_not_cached(self):
-        query = Mock(side_effect=[RuntimeError("permission denied"), []])
-        with self.assertRaises(RuntimeError):
-            module.allocation("endpoint", query)
-        self.assertIsNone(module.allocation("endpoint", query)["sample_at"])
+    def test_errors_are_classified_without_exposing_details(self):
+        for message, status in [
+            ("[SCHEMA_NOT_FOUND] secret", "missing_table"),
+            ("[TABLE_OR_VIEW_NOT_FOUND] secret", "missing_table"),
+            ("[INSUFFICIENT_PERMISSIONS] secret", "permission_denied"),
+            ("warehouse unavailable secret", "temporarily_unavailable"),
+        ]:
+            module._cache.clear()
+            result = module.allocation("endpoint", Mock(side_effect=RuntimeError(message)))
+            self.assertEqual(result["status"], status)
+            self.assertIsNone(result["estimated_cu"])
+            self.assertNotIn("secret", str(result))
+
+    def test_failed_reads_back_off_then_recover_without_restart(self):
+        query = Mock(side_effect=[RuntimeError("[SCHEMA_NOT_FOUND] missing"),
+                                 [{"ts": "2026-10-28T12:00:00Z", "host_memory_total_bytes": 2147483648}]])
+        with patch.object(module.time, "monotonic", return_value=100):
+            self.assertEqual(module.allocation("endpoint", query)["status"], "missing_table")
+        with patch.object(module.time, "monotonic", return_value=110):
+            self.assertEqual(module.allocation("endpoint", query)["status"], "missing_table")
+            self.assertEqual(query.call_count, 1)
+        with patch.object(module.time, "monotonic", return_value=131):
+            result = module.allocation("endpoint", query)
+            self.assertEqual(result["status"], "ready")
+            self.assertEqual(result["estimated_cu"], 1)
+
+    def test_sqlstate_classification(self):
+        for code, status in [("42501", "permission_denied"), ("42P01", "missing_table"),
+                             ("08001", "temporarily_unavailable")]:
+            error = RuntimeError("redacted")
+            error.sqlstate = code
+            self.assertEqual(module.error_status(error), status)

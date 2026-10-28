@@ -406,12 +406,13 @@ def scaling_state():
 
 @router.get("/scaling/allocation")
 def scaling_allocation():
-    from scaling_telemetry import allocation
+    from scaling_telemetry import allocation, unavailable
     try:
-        return allocation(ops.endpoint("demo").uid, dbsql)
+        uid = ops.endpoint("demo").uid
     except Exception:
-        log.exception("Allocation telemetry unavailable")
-        raise HTTPException(503, "Allocation telemetry unavailable. Check system.lakebase.compute_gauges access.")
+        log.exception("Could not resolve endpoint for allocation telemetry")
+        return unavailable("temporarily_unavailable")
+    return allocation(uid, dbsql)
 
 
 @router.post("/scaling/wake")

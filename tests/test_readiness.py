@@ -196,6 +196,28 @@ class ReadinessTests(unittest.TestCase):
             self.assertEqual(m.evaluate(checks['telemetry'])['status'], expected)
         self.assertIn('ep-example', reads.sql.call_args.args[0])
 
+    def test_missing_or_unreadable_telemetry_is_optional(self):
+        w, reads, checks = self.compute_checks()
+        for error in [NotFound("missing"), PermissionDenied("private")]:
+            w.tables.get.side_effect = error
+            result = m.evaluate(checks['telemetry'])
+            self.assertEqual(result['status'], 'warning')
+            reads.sql.assert_not_called()
+
+    def test_telemetry_query_failure_is_warning(self):
+        w, reads, checks = self.compute_checks()
+        w.postgres.get_endpoint.return_value.uid = 'ep-example'
+        reads.sql.side_effect = m.ReadFailure('unable_to_verify', 'private')
+        result = m.evaluate(checks['telemetry'])
+        self.assertEqual(result['status'], 'warning')
+        self.assertNotIn('private', result['detail'])
+
+    def test_disabled_observability_preview_is_optional(self):
+        w, reads, checks = self.compute_checks()
+        w.workspace_settings_v2.get_public_workspace_setting.return_value.effective_boolean_val.value = False
+        self.assertEqual(m.evaluate(checks['preview_observability'])['status'], 'warning')
+        self.assertEqual(m.evaluate(checks['preview_cdf'])['status'], 'not_ready')
+
     def test_benchmark_tiers_are_independent_and_read_rows(self):
         w, reads, checks = self.compute_checks()
         tiers = [c for key, c in checks.items() if key.startswith('history_tier_')]

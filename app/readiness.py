@@ -252,22 +252,32 @@ def checks(w, settings, reads=None):
             value = getattr(getattr(setting, "effective_boolean_val", None), "value", None)
             if value is None:
                 return verdict("unable_to_verify", "The settings API did not return an effective preview value.")
+            if key == "lakebase_system_table_o11y" and not value:
+                return verdict("warning", "Optional CU telemetry preview is disabled; other Scaling features remain available.")
             return verdict("ready" if value else "not_ready", "Preview is enabled for this workspace." if value else "Preview is disabled for this workspace.")
         add(id, label, f"workspace_settings_v2.get_public_workspace_setting (GET): {key}", "Ask a workspace administrator to verify this preview in Settings > Previews and the app identity’s permission to read settings.", preview, "preview", True)
 
     def observability_table():
-        w.tables.get("system.lakebase.compute_gauges")
+        try:
+            w.tables.get("system.lakebase.compute_gauges")
+        except NotFound:
+            return verdict("warning", "Optional CU telemetry table is not available or visible yet; other Scaling features remain available.")
+        except PermissionDenied:
+            return verdict("warning", "Optional CU telemetry metadata is not readable by the app; verify access with setup_telemetry.")
         ep = w.postgres.get_endpoint(name=s["LAKEBASE_ENDPOINT"])
         uid = getattr(ep, "uid", None)
         if not uid:
             return verdict("unable_to_verify", "The endpoint identifier needed for telemetry was not returned.")
         uid = uid.replace("'", "''")
-        rows = reads.sql("SELECT max(ts) AS latest FROM system.lakebase.compute_gauges "
-                         f"WHERE endpoint_id = '{uid}' AND ts >= current_timestamp() - INTERVAL 30 MINUTES")
+        try:
+            rows = reads.sql("SELECT max(ts) AS latest FROM system.lakebase.compute_gauges "
+                             f"WHERE endpoint_id = '{uid}' AND ts >= current_timestamp() - INTERVAL 30 MINUTES")
+        except (ReadFailure, TimeoutError):
+            return verdict("warning", "Optional CU telemetry could not be queried; verify warehouse availability and app SELECT/USE grants.")
         if not rows or not rows[0]["latest"]:
             return verdict("warning", "Telemetry SELECT access verified; no endpoint sample in the last 30 minutes. Collection may lag or compute may have been idle.")
         return verdict("ready", "Telemetry SELECT access verified with an endpoint sample from the last 30 minutes.")
-    add("telemetry", "Scaling telemetry access and freshness", "Warehouse SELECT: system.lakebase.compute_gauges (may wake compute)", "Verify observability capture and app SELECT/USE grants; allow time for ingestion after waking the endpoint.", observability_table, timeout=10)
+    add("telemetry", "Scaling telemetry access and freshness", "Warehouse SELECT: system.lakebase.compute_gauges (may wake compute)", "Run the optional setup_telemetry job after the table appears to grant app access; allow time for ingestion after waking the endpoint.", observability_table, timeout=10)
     return result
 
 

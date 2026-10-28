@@ -70,7 +70,8 @@ export interface PitrDelete { before_ts: string; ids: number[] }
 export interface PitrRestore { restore_branch: "restore"; found: number; seconds: number }
 export interface PitrCopyBack { copied: number }
 export interface ScalingState { state: string | null; min_cu: number; max_cu: number; suspend_timeout_s: number | null }
-export interface ScalingAllocation { sample_at: string | null; memory_bytes: number | null; estimated_cu: number | null }
+export type TelemetryStatus = "ready" | "missing_table" | "permission_denied" | "no_samples" | "temporarily_unavailable";
+export interface ScalingAllocation { status: TelemetryStatus; sample_at: string | null; memory_bytes: number | null; estimated_cu: number | null }
 export interface ScalingWake { state_before: string | null; connect_ms: number }
 export interface ScalingBurst extends ScalingState { queries: number; qps: number }
 

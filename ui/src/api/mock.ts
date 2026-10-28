@@ -320,6 +320,7 @@ const actions: Api = {
     return { copied: ids.length };
   }),
   scalingAllocation: () => step(250, () => ({
+    status: "ready" as const,
     sample_at: new Date(Math.floor(Date.now() / 30000) * 30000).toISOString(),
     memory_bytes: 2 * 1024 ** 3 * (Date.now() < mockBurstUntil ? 2 : 0.5),
     estimated_cu: Date.now() < mockBurstUntil ? 2 : 0.5,

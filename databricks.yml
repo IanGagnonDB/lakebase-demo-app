@@ -102,11 +102,6 @@ resources:
           sql_warehouse:
             id: ${resources.sql_warehouses.warehouse.id}
             permission: CAN_USE
-        - name: scaling-telemetry
-          uc_securable:
-            securable_full_name: system.lakebase.compute_gauges
-            securable_type: TABLE
-            permission: SELECT
         - name: postgres
           postgres:
             branch: projects/${resources.postgres_projects.project.project_id}/branches/production
@@ -114,6 +109,21 @@ resources:
             permission: CAN_CONNECT_AND_CREATE
 
   jobs:
+    setup_telemetry:
+      name: lakebase-demo-app-setup-telemetry
+      tags: {workshop: lakebase}
+      environments:
+        - environment_key: default
+          spec: {client: "3"}
+      tasks:
+        - &telemetry_task
+          task_key: telemetry
+          environment_key: default
+          spark_python_task:
+            python_file: ./setup/telemetry.py
+            parameters:
+              - --principal=${resources.apps.lakebase_demo_app.service_principal_client_id}
+
     setup:
       name: lakebase-demo-app-setup
       tags: {workshop: lakebase}
@@ -130,6 +140,9 @@ resources:
               - --schema=${var.schema}
               - --lakebase-catalog=${var.lakebase_catalog}
               - --principal=${resources.apps.lakebase_demo_app.service_principal_client_id}
+        - <<: *telemetry_task
+          depends_on:
+            - task_key: setup
 
 targets:
   workshop:

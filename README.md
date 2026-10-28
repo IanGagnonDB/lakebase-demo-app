@@ -11,9 +11,9 @@ tables, CDF, branching, point-in-time restore, autoscaling) and compares it with
 | 1   | **Databricks workspace on AWS or Azure** with serverless compute, Apps and Lakebase Autoscaling              | Every tab                                                          | Workspace admin                                                                                                                                         |
 | 2   | **Catalog on external storage** (S3 on AWS or ADLS Gen2 on Azure, same region), with `CREATE CATALOG` on the metastore | CDF (rejects default storage)                                      | Deployer, via [Terraform](terraform/README.md) or by hand ([AWS](https://docs.databricks.com/aws/en/connect/unity-catalog/cloud-storage/storage-credentials), [Azure](https://learn.microsoft.com/en-us/azure/databricks/connect/unity-catalog/cloud-storage/storage-credentials)) |
 | 3   | **Lakebase CDF** preview (`lakebase_cdf`)                                             | **CDF** tab                                                        | Workspace admin                                                                                                                                         |
-| 4   | **Lakebase Observability in System Tables** preview (`lakebase_system_table_o11y`)    | **Scaling** tab                                                    | Workspace admin                                                                                                                                         |
+| 4   | *Optional:* **Lakebase Observability in System Tables** preview (`lakebase_system_table_o11y`)    | Live CU readings in **Scaling** (other features work without it) | Workspace admin                                                                                                                                         |
 | 5   | Permissions to create Lakebase projects, SQL warehouses, apps and jobs                | `bundle deploy`                                                    | Workspace admin                                                                                                                                         |
-| 6   | Right to grant `SELECT` on `system.lakebase.compute_gauges`                           | `bundle deploy` grants it to the app                               | Metastore admin                                                                                                                                         |
+| 6   | *Optional:* Right to grant `SELECT` on `system.lakebase.compute_gauges`                           | `setup` grants it when available                               | Metastore admin                                                                                                                                         |
 | 7   | **Databricks CLI** ≥ v1.21, authenticated to the workspace                            | Deploy and cleanup                                                 | Deployer                                                                                                                                                |
 | 8   | *Optional:* Python 3.10+ (`requirements-dev.txt`), bash, curl, Node 20.19+            | Tests, smoke test, rebuilding the UI (`app/static` ships prebuilt) | Developer                                                                                                                                               |
 
@@ -55,6 +55,28 @@ benchmark-snapshot checks to be Ready before running the head-to-head benchmarks
 - The **Readiness** page (header button) checks every resource and preview.
 
 Optional: add `--var="warehouse_size=<size>"` to change the SQL warehouse size (default: Small).
+
+## Optional CU telemetry
+
+The app deploys without `system.lakebase.compute_gauges`. Normal setup attempts
+least-privilege telemetry grants when the table exists and reports a warning if
+it is missing or grant privileges are unavailable. Other setup errors still fail.
+The Scaling tab keeps endpoint state, configured CU range, wake timing, and burst
+tests available; live CU readings show a warning until readable samples arrive.
+
+After the preview provisions the table, run only the telemetry setup job as an
+identity allowed to grant `USE CATALOG` on `system`, `USE SCHEMA` on
+`system.lakebase`, and `SELECT` on `system.lakebase.compute_gauges`:
+
+```bash
+databricks bundle run setup_telemetry --profile <workspace-profile> -t workshop --var="catalog=<catalog>"
+```
+
+This job is idempotent and does not regenerate data. No app redeployment is needed.
+The app retries telemetry reads with backoff and recovers automatically once grants
+and samples are available. The app service principal does not grant itself access.
+These grants are managed by setup, outside the app's DAB resource bindings; bundle
+cleanup does not revoke them. Readiness reports unavailable telemetry as a warning.
 
 ## Cleanup
 

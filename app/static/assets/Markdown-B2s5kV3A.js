@@ -1,4 +1,4 @@
-import{c as xi,a7 as or,j as De,aa as wi}from"./index-Db-Zc6Ah.js";const ar={name:"code-xml",size:24,node:[["path",{d:"m18 16 4-4-4-4",key:"1inbqp"}],["path",{d:"m6 8-4 4 4 4",key:"15zrgr"}],["path",{d:"m14.5 4-5 16",key:"e7oirm"}]],aliases:["code-2"]};ar.node;const uh=xi(ar),Si=`---
+import{c as xi,a8 as or,j as De,ab as wi}from"./index-BXOAHNUv.js";const ar={name:"code-xml",size:24,node:[["path",{d:"m18 16 4-4-4-4",key:"1inbqp"}],["path",{d:"m6 8-4 4 4 4",key:"15zrgr"}],["path",{d:"m14.5 4-5 16",key:"e7oirm"}]],aliases:["code-2"]};ar.node;const uh=xi(ar),Si=`---
 tab: branching
 title: Branching
 ---

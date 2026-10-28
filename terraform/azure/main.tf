@@ -41,6 +41,15 @@ resource "azurerm_role_assignment" "data" {
   principal_type       = "ServicePrincipal"
 }
 
+# Unity Catalog requests user delegation keys at account scope. Blob data access
+# remains limited to the demo container by the separate assignment above.
+resource "azurerm_role_assignment" "delegation" {
+  scope                = azurerm_storage_account.data.id
+  role_definition_name = "Storage Blob Delegator"
+  principal_id         = azurerm_databricks_access_connector.data.identity[0].principal_id
+  principal_type       = "ServicePrincipal"
+}
+
 resource "databricks_storage_credential" "data" {
   name = "${var.name_prefix}-storage"
   azure_managed_identity {
@@ -51,10 +60,11 @@ resource "databricks_storage_credential" "data" {
 
 # Azure RBAC is eventually consistent; external location creation validates access.
 resource "time_sleep" "rbac_propagation" {
-  depends_on      = [azurerm_role_assignment.data]
+  depends_on      = [azurerm_role_assignment.data, azurerm_role_assignment.delegation]
   create_duration = "60s"
   triggers = {
-    role_assignment_id = azurerm_role_assignment.data.id
+    role_assignment_id       = azurerm_role_assignment.data.id
+    delegation_assignment_id = azurerm_role_assignment.delegation.id
   }
 }
 

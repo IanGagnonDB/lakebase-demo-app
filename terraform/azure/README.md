@@ -3,7 +3,8 @@
 Run this configuration from `terraform/azure`. It creates a dedicated resource
 group, ADLS Gen2 storage account and private container, Databricks Access Connector
 with a system-assigned managed identity, container-scoped Storage Blob Data
-Contributor assignment, Unity Catalog storage credential, external location, and
+Contributor assignment, account-scoped Storage Blob Delegator assignment for user
+delegation keys, Unity Catalog storage credential, external location, and
 the demo data catalog in an **existing Azure Databricks workspace**.
 
 Requires Terraform >= 1.5 and an Azure workspace/region with serverless compute,
@@ -47,7 +48,8 @@ terraform output -raw catalog_name
 
 Azure RBAC waits 60 seconds before the external location validates access. If
 propagation takes longer, wait and rerun `terraform apply`; validation stays enabled.
-The Access Connector identity receives data access only to the demo container.
+The Access Connector identity receives blob data access only to the demo container,
+plus permission to request user delegation keys at storage-account scope.
 
 Then return to the repository root and follow the [bundle deployment commands](../../README.md#deploy-once-15-min)
 with the same workspace profile and output catalog. The bundle creates the app,

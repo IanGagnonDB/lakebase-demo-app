@@ -1,7 +1,7 @@
 import { useClearResults } from "../../shared/clearResults";
 import { useEffect, useMemo, useState } from "react";
 import { Badge, BarChart, Empty, EmptyDescription, EmptyHeader, Skeleton, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@databricks/appkit-ui/react";
-import { Activity, Check, Info, ServerCog, Zap } from "lucide-react";
+import { Activity, Check, Info, ServerCog, TriangleAlert, Zap } from "lucide-react";
 import "./scaling.css";
 import { scalingSession, useScalingSession } from "./store";
 import { api, errorMessage, type ScalingAllocation, type ScalingState } from "../../api";
@@ -52,11 +52,18 @@ function AllocationRange({ endpoint, activityAt }: { endpoint: ScalingState; act
   const signal = useUnmountSignal();
   useEffect(() => {
     const active = signal();
+    let nextPoll = 0, retryMs = 5000;
     void pollUntil(async () => {
+      if (Date.now() < nextPoll) return;
       try {
         const result = await api.scalingAllocation();
         if (!active.aborted) { setSample(result); setFailed(false); }
-      } catch { if (!active.aborted) setFailed(true); }
+        retryMs = result.status === "ready" ? 5000 : Math.min(retryMs * 2, 60000);
+      } catch {
+        if (!active.aborted) setFailed(true);
+        retryMs = Math.min(retryMs * 2, 60000);
+      }
+      nextPoll = Date.now() + retryMs;
     }, () => false, { intervalMs: 5000, timeoutMs: Infinity, signal: active });
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
@@ -65,13 +72,30 @@ function AllocationRange({ endpoint, activityAt }: { endpoint: ScalingState; act
   const age = Math.max(0, Math.floor((now - at) / 1000));
   const suspended = endpoint.state === "IDLE";
   const fresh = Number.isFinite(at) && age <= 90 && (activityAt === null || at >= activityAt);
-  const available = endpoint.state === "ACTIVE" && fresh && !failed && sample?.estimated_cu != null;
+  const available = endpoint.state === "ACTIVE" && fresh && !failed && sample?.status === "ready" && sample.estimated_cu != null;
+  const status = failed ? "temporarily_unavailable" : sample?.status;
+  const unavailable = status !== undefined && status !== "ready";
+  const message = status === "missing_table"
+    ? "The telemetry table is not available or visible yet. Once it appears, your deployer can enable telemetry access."
+    : status === "permission_denied"
+      ? "The app does not have access to CU telemetry. Ask your deployer to enable telemetry access."
+      : status === "temporarily_unavailable"
+        ? "The telemetry query could not complete. The app will retry automatically."
+        : status === "no_samples"
+          ? "No recent CU samples are available yet. Collection may lag or the endpoint may have been idle."
+          : !suspended && sample && !fresh
+            ? "Waiting for a recent CU sample. Older readings are hidden."
+            : null;
   const rangeStart = Math.max(0, Math.min(100, endpoint.min_cu / (endpoint.max_cu || 1) * 100));
   const position = suspended || sample?.estimated_cu == null ? 0 : Math.max(0, Math.min(100,
     sample.estimated_cu / (endpoint.max_cu || 1) * 100));
   return <>
+    {message && <div className="scaling-telemetry-warning" role="status">
+      <TriangleAlert size={18} aria-hidden />
+      <div><strong>Live CU telemetry is unavailable</strong><p>{message} Endpoint state, wake timing, and burst tests remain available.</p></div>
+    </div>}
     <div className="scaling-allocation-heading">
-      <p className="scaling-allocation-value" role="status">{suspended ? "0 CU" : available ? `≈ ${sample.estimated_cu} CU` : failed ? "Allocation unavailable" : "Waiting for telemetry…"}</p>
+      <p className="scaling-allocation-value" role="status">{unavailable ? "Live CU unavailable" : suspended ? "0 CU · endpoint suspended" : available ? `≈ ${sample.estimated_cu} CU` : "Waiting for telemetry…"}</p>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -84,12 +108,11 @@ function AllocationRange({ endpoint, activityAt }: { endpoint: ScalingState; act
         </Tooltip>
       </TooltipProvider>
     </div>
-    <div role="img" aria-label={`Scale: 0–${endpoint.max_cu} CU. Configured autoscaling range: ${endpoint.min_cu}–${endpoint.max_cu} CU`} className="scaling-range">
+    <div role="img" aria-label={`Scale: 0–${endpoint.max_cu} CU. Configured autoscaling range: ${endpoint.min_cu}–${endpoint.max_cu} CU`} className="scaling-range" data-unavailable={unavailable || (!available && !suspended)}>
       <span className="scaling-range-fill" style={{ left: `${rangeStart}%`, width: `${100 - rangeStart}%` }} />
-      {(available || suspended) && <span className="scaling-range-marker" style={{ left: `${position}%` }} />}
+      {(available || (suspended && !unavailable)) && <span className="scaling-range-marker" style={{ left: `${position}%` }} />}
     </div>
     <div className="scaling-range-ticks text-xs text-muted-foreground"><span>0 CU</span>{endpoint.min_cu > 0 && endpoint.min_cu < endpoint.max_cu && <span className="scaling-range-min" style={{ left: `${rangeStart}%` }}>{endpoint.min_cu} CU</span>}<span>{endpoint.max_cu} CU</span></div>
-    {!suspended && failed && <p className="text-xs text-muted-foreground">Check telemetry permissions and warehouse availability; retrying automatically.</p>}
   </>;
 }
 

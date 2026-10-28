@@ -223,7 +223,7 @@ def analytics(body: AnalyticsIn):
     with experiment():
         started = time.perf_counter()
         table = f"activities_history_{body.rows}"
-        timeout_seconds = body.timeout_seconds or (60 if body.rows == 5_000_000 else 12)
+        timeout_seconds = body.timeout_seconds or (60 if body.rows >= 2_000_000 else 12)
         request_budget = 75 if timeout_seconds > 12 else 28
         result = {"rows": body.rows, "repetitions": body.repetitions, "timeout_seconds": timeout_seconds}
         outputs = {}

@@ -139,10 +139,21 @@ class HarnessTests(unittest.TestCase):
         connection.execute.side_effect = TimeoutError('query budget exceeded')
         with patch.object(self.module, 'prod', pool), patch.object(self.module, 'dbsql_query', return_value=([], 2.0)):
             result = self.module.analytics(self.module.AnalyticsIn(rows=2000000, repetitions=1))
-        self.assertEqual(result['timeout_seconds'], 12)
+        self.assertEqual(result['timeout_seconds'], 60)
         self.assertNotIn('p50', result['lakebase'])
         self.assertEqual(result['lakebase']['errors'], ['TimeoutError: query budget exceeded'])
         self.assertFalse(result['results_equal'])
+
+    def test_two_million_scan_gets_full_timeout_window(self):
+        pool = MagicMock()
+        connection = pool.connection.return_value.__enter__.return_value
+        connection.execute.return_value.fetchall.return_value = []
+        with patch.object(self.module, 'prod', pool), patch.object(self.module, 'dbsql_query', return_value=([], 2.0)) as dbsql:
+            result = self.module.analytics(self.module.AnalyticsIn(rows=2000000))
+        connection.execute.assert_any_call("SELECT set_config('statement_timeout', %s, true)", ('60s',))
+        dbsql.assert_any_call('SET STATEMENT_TIMEOUT = 60')
+        self.assertEqual(result['lakebase']['n'], 1)
+        self.assertTrue(result['results_equal'])
 
     def test_five_million_tier_and_bounded_timeout_override(self):
         body = self.module.AnalyticsIn(rows=5000000, repetitions=1, timeout_seconds=60)
