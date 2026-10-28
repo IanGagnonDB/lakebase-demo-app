@@ -32,9 +32,11 @@ databricks apps get lakebase-demo-app    # prints the app URL
 
 - `setup` writes the synthetic sales scorecard to Delta and grants the app catalog access.
 - When the app starts, it provisions the rest itself: Postgres tables, synced tables, the CDF
-feed, and the `demo` branch. Open `<app URL>/api/meta` → `provisioning`. Every step should read
-`ok` (or `already …`) within a few minutes. The synced tables' first sync takes ~5–10 minutes
-more; the Lakebase side of the head-to-head needs it.
+feed, and the `demo` branch. Open `<app URL>/api/meta` → `provisioning`. Within a few minutes,
+steps should finish with `ok`, `seeded`, `already …`, or `sync submitted …`, with no `running`
+or `error: …` entries. `sync submitted …` confirms submission, not completed sync. The synced
+tables' first sync can take ~5–10 minutes more; wait for the Readiness page's synced-table and
+benchmark-snapshot checks to be Ready before running the head-to-head benchmarks.
 - The **Readiness** page (header button) checks every resource and preview.
 
 Optional: add `--var="warehouse_size=<size>"` to change the SQL warehouse size (default: Small).
