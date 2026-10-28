@@ -1,0 +1,76 @@
+/* Keep the demo's comparison surfaces quiet inside the elevated outer card. */
+.branching-demo { --branch-rail: color-mix(in oklch, var(--primary) 60%, var(--border)); display: grid; gap: 1.5rem; }
+.branching-tree { display: grid; grid-template-columns: minmax(0, 1fr) 1.5rem minmax(0, 1fr); align-items: center; gap: 0; padding: 1.25rem 1.5rem; border-radius: 0.75rem; background: var(--surface-tint); }
+.branching-node { position: relative; width: fit-content; max-width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--card); }
+.branching-root { width: 100%; background: var(--accent); }
+.branching-node-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9375rem; font-weight: 600; line-height: 1.5; }
+.branching-node-title svg { flex-shrink: 0; color: var(--primary); }
+.branching-node-note { margin-top: 0.25rem; font-size: 0.8125rem; line-height: 1.5; color: var(--muted-foreground); }
+.branching-children { min-width: 0; }
+.branching-child-list { display: grid; gap: 0; }
+.branching-child { margin-top: 1rem; }
+.branching-child:first-child { margin-top: 0; }
+.branching-schema { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 0.75rem; background: color-mix(in srgb, var(--muted) 38%, var(--card)); }
+.branching-schema-heading { padding: 0.875rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9375rem; font-weight: 600; line-height: 1.4; }
+.branching-columns { padding: 0.5rem; }
+.branching-column { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; min-height: 2rem; padding: 0.3rem 0.5rem; border-radius: 0.375rem; font-size: 0.8125rem; line-height: 1.6; }
+.branching-column-new { color: var(--success); background: color-mix(in srgb, var(--success) 10%, var(--card)); }
+.branching-actions { padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+.branching-actions p { margin-top: 0.5rem; overflow-wrap: anywhere; }
+.branching-result, .branching-error { padding: 1rem 1.25rem; border-radius: 0.65rem; font-variant-numeric: tabular-nums; }
+.branching-result { background: color-mix(in srgb, var(--success) 7%, var(--card)); }
+.branching-error { background: color-mix(in srgb, var(--destructive) 6%, var(--card)); }
+.branching-empty { border: 0; border-radius: 0.75rem; padding: 1.5rem; background: var(--muted); }
+.branching-loading { display: grid; gap: 1.5rem; }
+@media (max-width: 639px) {
+  .branching-tree { padding: 1rem; }
+  .branching-result, .branching-error { padding: 0.875rem 1rem; }
+}
+
+.branching-experiment-heading h3 { margin-top: 0.5rem; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 650; letter-spacing: -0.035em; line-height: 1.2; max-width: 34rem; }
+.branching-environments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.branching-review-score { display: flex; align-items: center; gap: 1.25rem; padding: 1.25rem; background: var(--surface-tint); border-radius: 0.75rem; }
+.branching-big-number { font-size: 3.5rem; font-weight: 650; line-height: 1; color: var(--primary); font-variant-numeric: tabular-nums; }
+.branching-review-score p { font-size: 0.875rem; color: var(--muted-foreground); }
+.branching-eyebrow, .branching-caption { display: flex; align-items: center; gap: 0.5rem; }
+@media (max-width: 700px) {
+  .branching-environments { grid-template-columns: 1fr; }
+  .branching-review-score { gap: 0.75rem; }
+}
+.branching-cumulative { display: grid; gap: 1.25rem; }
+.branching-sample { padding: 1rem; border-top: 1px solid var(--border); font-size: 0.8125rem; }
+.branching-sample > div { display: flex; justify-content: space-between; padding: 0.5rem; }
+.branching-removed { color: var(--destructive); background: color-mix(in srgb, var(--destructive) 10%, var(--card)); }
+.branching-dropped-badge { color: var(--destructive); border-color: color-mix(in srgb, var(--destructive) 35%, var(--card)); background: var(--card); }
+.branching-header-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.65fr); align-items: center; gap: 2rem; }
+.branching-header-main { display: grid; gap: 1.5rem; min-width: 0; }
+.branching-header-row .branching-actions { padding-bottom: 0; border-bottom: 0; }
+.branching-header-row h3 { margin-top: 0; }
+.branching-header-graph { min-width: 0; font-size: 0.8125rem; }
+.branching-header-graph .branching-tree { padding: 1rem; }
+.branching-header-graph .branching-node { width: 100%; padding: 0.5rem; }
+@media (max-width: 700px) {
+  .branching-header-row { grid-template-columns: 1fr; gap: 1.25rem; }
+}
+.branching-caption { font-size: 0.8125rem; color: var(--muted-foreground); }
+.branching-stopwatch { background: var(--surface-tint); min-width: 0; padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.75rem; display: grid; gap: 0.75rem; align-content: start; }
+.branching-stopwatch > strong { font-size: 3rem; font-variant-numeric: tabular-nums; line-height: 1.2; letter-spacing: -0.04em; color: var(--primary); }
+.branching-stopwatch small { font-size: 1rem; letter-spacing: normal; color: var(--muted-foreground); font-weight: 500; }
+@media (max-width: 700px) { .branching-stopwatch { padding: 1rem; } }
+.branching-summary-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.branching-summary-row .branching-review-score { min-width: 0; }
+.branching-schema-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.branching-production-shield { flex-shrink: 0; color: var(--success); }
+.branching-production-badge { margin-left: auto; color: var(--success); border-color: currentColor; background: color-mix(in srgb, var(--success) 7%, var(--card)); }
+@media (max-width: 700px) { .branching-summary-row { grid-template-columns: 1fr; } }
+.branching-arrow { width: 1.5rem; height: 1rem; overflow: visible; color: var(--branch-rail); }
+.branching-arrow line { stroke: currentColor; stroke-width: 1.5; }
+.branching-arrow path { fill: currentColor; }
+
+.branching-eyebrow { color: var(--muted-foreground); font-size: 0.8125rem; font-weight: 600; }
+
+.branching-warning { display: grid; gap: 0.75rem; padding: 1rem 1.25rem; border-radius: 0.65rem; color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--card)); font-size: 0.875rem; }
+
+.branching-sample-updated { color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); }
+
+.branching-new-badge { color: var(--success); border-color: color-mix(in srgb, var(--success) 35%, var(--card)); background: var(--card); }

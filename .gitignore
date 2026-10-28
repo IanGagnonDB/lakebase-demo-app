@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.polly/
+CONTEXT.md
+out.txt
+.databricks/
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/*.tfvars
+terraform/*.tfvars.json
+terraform/crash.log
+terraform/*.tfplan

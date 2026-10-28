@@ -1,0 +1,9 @@
+aws_region         = "us-east-1"
+# aws_profile        = "your-aws-profile"
+# databricks_profile = "your-workspace-profile"
+# databricks_host    = "https://<workspace-host>"
+bucket_name  = "<globally-unique-demo-bucket>"
+catalog_name = "lakebase_demo"
+name_prefix  = "lakebase-demo"
+force_destroy = false
+tags = { demo = "lakebase" }

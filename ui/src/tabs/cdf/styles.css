@@ -1,0 +1,31 @@
+.cdf-demo { display: grid; gap: 1.5rem; min-width: 0; }
+.cdf-resting-hint { margin-top: -0.5rem; font-size: 0.875rem; color: var(--muted-foreground); }
+.cdf-unavailable { border-color: var(--border); background: var(--surface-tint); color: var(--warning); border-left: 3px solid var(--warning); border-radius: 0.65rem; }
+.cdf-unavailable [data-slot="alert-description"] { color: var(--foreground); min-width: 0; }
+.cdf-unavailable a { color: var(--primary); text-underline-offset: 3px; }
+.cdf-board { padding-top: 1.5rem; border-top: 1px solid var(--border); min-width: 0; }
+.cdf-board-title { margin-bottom: 1rem; font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.02em; }
+.cdf-table { min-width: 620px; font-size: 0.875rem; }
+.cdf-table th { height: 2.75rem; padding-inline: 0.75rem; background: var(--muted); color: var(--muted-foreground); font-size: 0.75rem; font-weight: 600; }
+.cdf-table td { padding: 1rem 0.75rem; vertical-align: middle; }
+.cdf-table td:first-child > p { font-size: 0.6875rem; line-height: 1.4; }
+.cdf-key, .cdf-committed, .cdf-arrival-status { font-variant-numeric: tabular-nums; }
+.cdf-key { font-weight: 600; }
+.cdf-operation { min-width: 3.75rem; justify-content: center; border: 0; border-radius: 0.35rem; font-size: 0.6875rem; font-weight: 600; line-height: 1.5; }
+.cdf-operation-insert { color: var(--success); background: color-mix(in srgb, var(--success) 9%, var(--card)); }
+.cdf-operation-update { color: var(--primary); background: var(--accent); }
+.cdf-operation-delete { color: var(--destructive); background: color-mix(in srgb, var(--destructive) 8%, var(--card)); }
+.cdf-arrival-status { display: inline-flex; align-items: center; gap: 0.5rem; line-height: 1.4; }
+.cdf-status-visible { color: var(--success); font-weight: 600; }
+.cdf-status-writing, .cdf-status-pending { color: var(--muted-foreground); }
+.cdf-status-error { color: var(--destructive); }
+.cdf-status-timeout, .cdf-status-unavailable { color: var(--warning); }
+.cdf-empty { margin-top: 0.5rem; padding: 2rem 1.5rem; border: 0; border-radius: 0.65rem; background: var(--surface-tint); }
+.cdf-empty [data-slot="empty-description"] { max-width: 30rem; font-size: 0.875rem; line-height: 1.7; }
+.cdf-timing-note { padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; line-height: 1.7; color: var(--muted-foreground); }
+@media (max-width: 700px) {
+  .cdf-table td { padding-block: 0.75rem; }
+  .cdf-empty { padding: 1.5rem 1rem; }
+}
+
+.cdf-flow-success { max-width: 10rem; line-height: 1.4; }

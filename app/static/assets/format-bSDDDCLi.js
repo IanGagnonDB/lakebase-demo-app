@@ -1,0 +1,1 @@
+function o(e){return e>=1e3?`${(e/1e3).toFixed(2)} s`:e<10?`${e.toFixed(1)} ms`:`${Math.round(e)} ms`}function a(e,n){return e.replace(/\{([\w.]+)\}/g,(u,i)=>{const r=i.split(".").reduce((t,l)=>t?.[l],n);return r==null?u:String(r)})}export{a,o as f};

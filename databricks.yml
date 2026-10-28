@@ -1,0 +1,136 @@
+# Lakebase Demo App — self-contained bundle. Deployer runs, once:
+#   export VARS="--var catalog=<cat>"
+#   databricks bundle deploy -t workshop $VARS
+#   databricks bundle run setup -t workshop $VARS               # Delta data + catalog grants
+#   databricks bundle run lakebase_demo_app -t workshop $VARS   # app provisions Lakebase objects at startup
+#   databricks bundle destroy -t workshop $VARS                 # after the workshop
+bundle:
+  name: lakebase-demo-app
+
+sync:
+  exclude: [requirements-dev.txt]
+
+variables:
+  catalog:
+    default: lakebase_demo
+    description: UC catalog for workshop data. Must NOT use default storage (Lakebase CDF requirement).
+  schema:
+    default: scorecard
+  bronze_schema:
+    default: bronze
+  warehouse_size:
+    description: Serverless warehouse size for the DBSQL side of the head-to-head (Medium ≈ +$17/workshop).
+    default: Small
+  project_id:
+    default: lakebase-demo-app
+  lakebase_catalog:
+    description: UC catalog that registers the Lakebase database (synced tables land here).
+    default: lakebase_demo_pg
+  pg_database_id:
+    description: Resource id of the default Lakebase database (the one every new project gets).
+    default: databricks-postgres
+
+resources:
+  sql_warehouses:
+    warehouse:
+      name: lakebase-demo-app
+      cluster_size: ${var.warehouse_size}
+      min_num_clusters: 1
+      max_num_clusters: 2
+      auto_stop_mins: 5
+      enable_serverless_compute: true
+      warehouse_type: PRO
+      tags:
+        custom_tags:
+          - {key: workshop, value: lakebase}
+
+  postgres_projects:
+    project:
+      project_id: ${var.project_id}
+      display_name: Lakebase Demo App
+      pg_version: 17
+      history_retention_duration: 604800s
+      # Defaults are for demo/restore branches. The app resizes production to 1–4 CU always-on at startup.
+      default_endpoint_settings:
+        autoscaling_limit_min_cu: 0.5
+        autoscaling_limit_max_cu: 2
+        suspend_timeout_duration: 60s
+      custom_tags:
+        - {key: workshop, value: lakebase}
+      permissions:
+        - service_principal_name: ${resources.apps.lakebase_demo_app.service_principal_client_id}
+          level: CAN_MANAGE
+
+  postgres_catalogs:
+    lakebase:
+      catalog_id: ${var.lakebase_catalog}
+      # Reference the project resource (not ${var.project_id}) so the bundle creates the project first.
+      branch: projects/${resources.postgres_projects.project.project_id}/branches/production
+      postgres_database: databricks_postgres
+
+  schemas:
+    scorecard:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      grants:
+        - principal: ${resources.apps.lakebase_demo_app.service_principal_client_id}
+          privileges: [USE_SCHEMA, SELECT, MODIFY, CREATE_TABLE]  # CREATE_TABLE: synced-table pipeline storage
+    bronze:
+      catalog_name: ${var.catalog}
+      name: ${var.bronze_schema}
+      grants:
+        - principal: ${resources.apps.lakebase_demo_app.service_principal_client_id}
+          privileges: [USE_SCHEMA, SELECT, MODIFY, CREATE_TABLE]
+
+  apps:
+    lakebase_demo_app:
+      name: lakebase-demo-app
+      description: Lakebase demo app — Lakebase vs DBSQL for app backends.
+      source_code_path: ./app
+      config:
+        command: [uvicorn, main:app, --host, 0.0.0.0, --port, "8000"]
+        env:
+          - {name: CATALOG, value: "${var.catalog}"}
+          - {name: SCHEMA, value: "${var.schema}"}
+          - {name: BRONZE_SCHEMA, value: "${var.bronze_schema}"}
+          - {name: LAKEBASE_PROJECT, value: "${var.project_id}"}
+          - {name: LAKEBASE_CATALOG, value: "${var.lakebase_catalog}"}
+          - {name: DATABRICKS_WAREHOUSE_ID, value_from: sql-warehouse}
+          - {name: LAKEBASE_ENDPOINT, value_from: postgres}
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${resources.sql_warehouses.warehouse.id}
+            permission: CAN_USE
+        - name: scaling-telemetry
+          uc_securable:
+            securable_full_name: system.lakebase.compute_gauges
+            securable_type: TABLE
+            permission: SELECT
+        - name: postgres
+          postgres:
+            branch: projects/${resources.postgres_projects.project.project_id}/branches/production
+            database: projects/${resources.postgres_projects.project.project_id}/branches/production/databases/${var.pg_database_id}
+            permission: CAN_CONNECT_AND_CREATE
+
+  jobs:
+    setup:
+      name: lakebase-demo-app-setup
+      tags: {workshop: lakebase}
+      environments:
+        - environment_key: default
+          spec: {client: "3", dependencies: ["faker==30.8.2"]}
+      tasks:
+        - task_key: setup
+          environment_key: default
+          spark_python_task:
+            python_file: ./setup/setup.py
+            parameters:
+              - --catalog=${var.catalog}
+              - --schema=${var.schema}
+              - --lakebase-catalog=${var.lakebase_catalog}
+              - --principal=${resources.apps.lakebase_demo_app.service_principal_client_id}
+
+targets:
+  workshop:
+    default: true

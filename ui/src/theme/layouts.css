@@ -1,0 +1,58 @@
+/* Permanent Elevated cards layout. All surfaces use the Brand header theme. */
+html.light {
+  --surface-tint: color-mix(in srgb, var(--accent) 45%, var(--card));
+  --surface-edge: color-mix(in oklch, var(--primary) 18%, var(--border));
+  --section-radius: 1rem;
+}
+.workshop-page { max-width: 1152px; margin: 0 auto; padding: 3rem 1.5rem 6rem; font-family: var(--workshop-font); }
+.page-heading { position: relative; padding: 2.5rem 2.75rem; margin-bottom: 2rem; border: 1px solid var(--surface-edge); border-radius: 1.25rem; background: linear-gradient(115deg, var(--card), var(--surface-tint)); }
+.page-heading::before { content: ""; display: block; width: 2.5rem; height: 4px; margin-bottom: 1.25rem; background: var(--nav-active); border-radius: 2px; }
+.page-heading h1 { font-size: clamp(2rem, 3.3vw, 3rem); font-weight: 650; line-height: 1.08; letter-spacing: -0.045em; margin-bottom: 1rem; text-wrap: balance; }
+.page-heading h1:last-child { margin-bottom: 0; }
+.page-framing { max-width: 52rem; font-size: 1.125rem; color: var(--muted-foreground); line-height: 1.65; }
+.page-body { display: grid; gap: 1.5rem; }
+.page-section { min-width: 0; padding: 1.75rem 2rem; border: 1px solid var(--border); border-radius: var(--section-radius); background: var(--card); box-shadow: var(--elevation-soft); }
+.section-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.25rem; }
+.section-heading { font-size: 1.25rem; font-weight: 650; line-height: 1.3; letter-spacing: -0.025em; }
+.section-icon { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; flex-shrink: 0; border: 1px solid var(--surface-edge); border-radius: 0.65rem; color: var(--primary); background: var(--surface-tint); }
+.section-content { font-size: 1rem; line-height: 1.7; min-width: 0; }
+.page-narrative .section-content > div:not(.home-engines):not(.wrapup-grid) { max-width: 56rem; }
+.page-demo { border-color: var(--surface-edge); padding: 2rem; box-shadow: var(--elevation-demo); background: linear-gradient(180deg, var(--surface-tint), var(--card) 8rem); }
+.page-demo .section-header { padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+.page-demo .section-icon { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.page-implementation .section-content > [data-slot="collapsible"] { border-radius: 0.75rem; background: var(--muted); }
+.page-resources .section-content ul { display: grid; gap: 0.6rem; }
+.page-resources .section-content li { border-bottom: 1px solid var(--border); padding-bottom: 0.65rem; }
+.page-resources .section-content li:last-child { border: 0; padding-bottom: 0; }
+.page-resources a { color: var(--primary); text-underline-offset: 4px; }
+.page-footer { margin-top: 2rem; padding: 1rem 0; border-top: 1px solid var(--border); }
+.home-engines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; font-size: 0.9375rem; }
+.workshop-home .home-engine { display: grid; align-content: start; gap: 1rem; }
+.workshop-home .home-engine + .home-engine { border-left: 1px solid var(--border); padding-left: 2rem; }
+.workshop-home .home-engine h3 { font-size: 1.0625rem; font-weight: 600; }
+.workshop-home .home-loop ol { gap: 0.65rem; }
+.workshop-home .home-loop button, .workshop-home .home-loop [data-slot="badge"] { font-size: 0.875rem; }
+.workshop-home .home-cta { margin-top: 1.5rem; border-radius: 0.65rem; box-shadow: var(--elevation-soft); }
+.home-engine svg { color: var(--muted-foreground); }
+.home-engine li + li { margin-top: 0.3rem; }
+.home-engine h3 { line-height: 1.4; }
+.home-loop button { background: var(--muted); }
+.home-loop li:first-child [data-slot="badge"], .home-loop li:last-child [data-slot="badge"] {
+  color: var(--primary); border-color: var(--primary); background: var(--accent);
+}
+.home-cta { font-size: 1em; height: auto; padding: 0.75rem 1.25rem; }
+@media (max-width: 700px) {
+  .workshop-page { padding: 1.75rem 1rem 5rem; }
+  .page-heading { padding: 1.75rem 1.25rem; }
+  .page-heading h1 { font-size: 2.25rem; }
+  .page-framing { font-size: 1.0625rem; }
+  .page-section, .page-demo { padding: 1.25rem; }
+  .home-engines { grid-template-columns: 1fr; gap: 1.5rem; }
+  .workshop-home .home-engine + .home-engine { border-left: 0; padding-left: 0; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+}
+.wrapup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.wrapup-card { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.75rem; background: var(--surface-tint); }
+.wrapup-card h3 { font-size: 1.0625rem; font-weight: 600; line-height: 1.4; }
+@media (max-width: 700px) { .wrapup-grid { grid-template-columns: 1fr; } }
+
+.clear-results-button { margin-left: auto; flex-shrink: 0; }

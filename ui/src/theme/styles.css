@@ -1,0 +1,150 @@
+/* Permanent Brand header theme. Color literals are defined only here.
+   The static html.light class also disables AppKit’s OS dark-mode fallback. */
+/* Tailwind dark utilities must follow the explicit class too, never the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html.light {
+  --workshop-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --elevation-soft: 0 4px 20px oklch(0.26 0.04 250 / 0.045), 0 1px 2px oklch(0.26 0.04 250 / 0.035);
+  --elevation-demo: 0 12px 36px oklch(0.26 0.04 250 / 0.08), 0 2px 5px oklch(0.26 0.04 250 / 0.04);
+
+  color-scheme: light;
+  --background: oklch(0.97 0.006 250);
+  --foreground: oklch(0.32 0.025 250);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --muted: oklch(0.94 0.009 250);
+  --muted-foreground: oklch(0.46 0.025 250);
+  --primary: oklch(0.46 0.13 250);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --accent: oklch(0.93 0.025 250);
+  --accent-foreground: var(--primary);
+  --border: oklch(0.86 0.012 250);
+  --input: var(--border);
+  --ring: var(--primary);
+  --radius: 0.4rem;
+  --action-radius: calc(var(--radius) + 0.25rem);
+  --action-min-height: 2.75rem;
+  --success: oklch(0.43 0.09 165);
+  --success-foreground: oklch(0.99 0 0);
+  --home-olap: #b5531a;
+  --home-olap-edge: #e8732c;
+  --home-olap-tint: #fff4eb;
+  --warning: oklch(0.46 0.09 65);
+  --warning-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.48 0.17 28);
+  --destructive-foreground: oklch(0.99 0 0);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  /* ECharts needs browser-independent hsl colors, not oklch. */
+  --chart-cat-1: hsl(212 65% 40%);
+  --chart-cat-2: hsl(165 55% 32%);
+  --chart-cat-3: hsl(280 40% 45%);
+  --chart-cat-4: hsl(33 80% 35%);
+  --chart-cat-5: hsl(345 60% 42%);
+  --chart-cat-6: hsl(190 75% 30%);
+  --chart-cat-7: hsl(255 45% 48%);
+  --chart-cat-8: hsl(140 50% 32%);
+  --chart-seq-1: hsl(212 35% 94%);
+  --chart-seq-2: hsl(212 40% 84%);
+  --chart-seq-3: hsl(212 45% 73%);
+  --chart-seq-4: hsl(212 50% 62%);
+  --chart-seq-5: hsl(212 55% 50%);
+  --chart-seq-6: hsl(212 60% 40%);
+  --chart-seq-7: hsl(212 65% 30%);
+  --chart-seq-8: hsl(212 70% 22%);
+  --chart-div-1: hsl(212 65% 30%);
+  --chart-div-2: hsl(212 55% 43%);
+  --chart-div-3: hsl(212 45% 60%);
+  --chart-div-4: hsl(212 30% 80%);
+  --chart-div-5: hsl(10 30% 80%);
+  --chart-div-6: hsl(10 45% 60%);
+  --chart-div-7: hsl(10 60% 43%);
+  --chart-div-8: hsl(10 70% 32%);
+  --chart-axis-label: hsl(215 16% 38%);
+  --chart-axis-title: hsl(215 20% 24%);
+  --chart-grid: hsl(215 15% 85%);
+  --chart-tooltip-bg: hsl(0 0% 100%);
+  --header-background: oklch(0.26 0.045 250);
+  --header-foreground: oklch(0.94 0.01 250);
+  --header-border: oklch(0.40 0.03 250);
+  --header-badge: oklch(0.81 0.015 250);
+  --shell-font-size: 0.9375rem;
+  --nav-active: oklch(0.52 0.18 32);
+}
+/* Shell typography and navigation. Page composition lives in layouts.css. */
+.app-header, .app-nav {
+  font-family: var(--workshop-font);
+}
+.app-header {
+  background: var(--header-background);
+  color: var(--header-foreground);
+  border-color: var(--header-border);
+  font-size: var(--shell-font-size);
+}
+.app-header-inner { display: flex; align-items: center; gap: 0.75rem; min-height: 4rem; width: 100%; max-width: 1152px; margin-inline: auto; padding: 0.75rem 1.5rem; }
+.app-header [data-slot="badge"] { color: var(--header-badge); border-color: var(--header-border); }
+.app-header img { filter: brightness(0) invert(1); }
+.app-nav {
+  margin: 1rem auto 0;
+  width: fit-content;
+  max-width: calc(100% - 3rem);
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: var(--radius);
+}
+.app-nav [role="tab"] { font-size: var(--shell-font-size); padding: 0.5rem 0.85rem; height: auto; }
+.app-nav [role="tab"][data-state="active"] {
+  color: var(--nav-active);
+  background: var(--accent);
+  box-shadow: inset 0 -2px var(--nav-active);
+}
+.app-nav [role="tab"][data-state="active"]:focus-visible {
+  box-shadow: inset 0 -2px var(--nav-active), 0 0 0 3px var(--ring);
+}
+@media (max-width: 700px) {
+  .app-header-inner { padding-inline: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .app-nav { max-width: calc(100% - 2rem); }
+  .app-nav [role="tab"] { padding: 0.5rem; }
+}
+/* Prism supplies inline colors. Override those in this theme layer so code
+   follows the same light surfaces and AA text contrast as the rest of the app. */
+html.light pre.prism-code {
+  color: var(--foreground) !important;
+  background-color: var(--muted) !important;
+  border: 1px solid var(--border);
+  color-scheme: light;
+}
+html.light pre.prism-code .token { color: var(--foreground) !important; }
+html.light pre.prism-code .token.comment,
+html.light pre.prism-code .token.prolog { color: var(--muted-foreground) !important; }
+html.light pre.prism-code .token.keyword,
+html.light pre.prism-code .token.builtin,
+html.light pre.prism-code .token.number,
+html.light pre.prism-code .token.boolean { color: var(--primary) !important; }
+html.light pre.prism-code .token.string { color: var(--success) !important; }
+
+.app-home-link:focus-visible { outline: 2px solid var(--header-foreground); outline-offset: 5px; }
+
+.reset-demo-button { margin-left: auto; }
+.reset-demo-dialog { position: fixed; inset: 0; margin: auto; width: min(38rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); overflow: auto; padding: 1.5rem; border: 1px solid var(--border); border-radius: .8rem; background: var(--background); color: var(--foreground); box-shadow: 0 1rem 4rem #0003; }
+.reset-demo-dialog::backdrop { background: #0007; }
+.reset-demo-dialog h2 { font-size: 1.25rem; font-weight: 600; }
+.reset-demo-dialog > * + * { margin-top: 1rem; }
+.reset-demo-steps { display: grid; gap: .65rem; font-size: .8rem; }
+.reset-demo-steps li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem; }
+.reset-demo-steps li p { flex-basis: 100%; overflow-wrap: anywhere; }
+.reset-demo-steps [data-status="done"] strong { color: var(--success); }
+.reset-demo-steps [data-status="failed"] { color: var(--destructive); }
