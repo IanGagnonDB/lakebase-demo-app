@@ -76,3 +76,25 @@ resource "databricks_catalog" "data" {
   storage_root = "${trimsuffix(databricks_external_location.data.url, "/")}/catalog"
   comment      = "Lakebase demo data on external storage"
 }
+
+# Singular grants preserve other principals' grants, but manage this principal's
+# entire privilege set on each securable; do not manage that same pair elsewhere.
+resource "databricks_grant" "deployer_catalog" {
+  count = var.deployer_principal != null ? 1 : 0
+
+  catalog    = databricks_catalog.data.name
+  principal  = var.deployer_principal
+  privileges = ["USE_CATALOG", "CREATE_SCHEMA", "MANAGE"]
+}
+
+data "databricks_current_metastore" "deployer" {
+  count = var.deployer_principal != null && var.grant_create_catalog ? 1 : 0
+}
+
+resource "databricks_grant" "deployer_metastore" {
+  count = var.deployer_principal != null && var.grant_create_catalog ? 1 : 0
+
+  metastore  = data.databricks_current_metastore.deployer[0].id
+  principal  = var.deployer_principal
+  privileges = ["CREATE_CATALOG"]
+}

@@ -49,3 +49,15 @@ variable "tags" {
   type        = map(string)
   default     = { demo = "lakebase" }
 }
+
+variable "deployer_principal" {
+  description = "Optional deployer user email, group name, or service principal application ID. Null skips all deployer grants."
+  type        = string
+  default     = null
+}
+
+variable "grant_create_catalog" {
+  description = "Grant CREATE_CATALOG on the current metastore when deployer_principal is set. Requires a metastore admin to apply."
+  type        = bool
+  default     = false
+}

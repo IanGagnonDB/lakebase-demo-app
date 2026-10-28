@@ -25,3 +25,6 @@ from the bundle root, then `cd terraform && terraform destroy`. The bucket defau
 to `force_destroy = false`; empty it first or explicitly opt in to deleting demo
 objects. This Terraform owns only the prerequisite catalog/storage, not bundle
 resources. Do not reuse names of existing resources.
+
+Set `deployer_principal` (default null) for catalog `USE_CATALOG`, `CREATE_SCHEMA`, `MANAGE`; optionally set `grant_create_catalog = true` for metastore `CREATE_CATALOG` (requires a metastore admin to apply).
+Singular `databricks_grant` preserves other principals' grants but manages this principal's entire privilege set per securable, including revocation on destroy; avoid existing grants for that same principal/securable pair.

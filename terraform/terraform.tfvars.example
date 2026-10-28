@@ -7,3 +7,5 @@ catalog_name = "lakebase_demo"
 name_prefix  = "lakebase-demo"
 force_destroy = false
 tags = { demo = "lakebase" }
+# deployer_principal = "your-deployer-group" # User email, group name, or SP application ID; null skips grants.
+# grant_create_catalog = true # Optional; requires a metastore admin to apply.
